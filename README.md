@@ -88,10 +88,6 @@ spring.datasource.username=SEU_USUARIO
 spring.datasource.password=SUA_SENHA
 ```
 
-> ⚠️ Este arquivo não deve ser versionado (já está no `.gitignore`).
-
----
-
 ## 🔌 Endpoints
 
 ### 📍 Criar hábito
