@@ -60,21 +60,35 @@ com.felipe.habito
 
 ## ⚙️ Configuração do banco de dados
 
-Crie o banco no MySQL:
+### 1. Criar o banco no MySQL
 
 ```sql
 CREATE DATABASE habito;
 ````
 
-Configure no `application.properties`:
+---
+
+### 2. Configurar a aplicação
+
+No arquivo `application.properties`:
 
 ```properties
 spring.datasource.url=jdbc:mysql://localhost:3306/habito?serverTimezone=UTC
-spring.datasource.username=root
-spring.datasource.password=root
-
-spring.jpa.hibernate.ddl-auto=update
+spring.profiles.active=local
 ```
+
+---
+
+### 3. Configurar credenciais (não versionado)
+
+Crie o arquivo `application-local.properties`:
+
+```properties
+spring.datasource.username=SEU_USUARIO
+spring.datasource.password=SUA_SENHA
+```
+
+> ⚠️ Este arquivo não deve ser versionado (já está no `.gitignore`).
 
 ---
 
@@ -170,4 +184,5 @@ Desenvolvido por **Felipe Shimizu**
 ## 📄 Licença
 
 Este projeto é de uso educacional.
+
 
