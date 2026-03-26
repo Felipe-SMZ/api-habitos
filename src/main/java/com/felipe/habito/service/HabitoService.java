@@ -39,16 +39,6 @@ public class HabitoService {
                     "Frequência é obrigatória"
             );
         }
-
-        String freq = habito.getFrequencia().toUpperCase();
-
-        if (!freq.equals("DIARIO") && !freq.equals("SEMANAL")) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Frequência deve ser DIARIO ou SEMANAL"
-            );
-        }
-
         return habitoRepository.save(habito);
     }
 
@@ -78,19 +68,17 @@ public class HabitoService {
             );
         }
 
-        String freq = habitoAtualizado.getFrequencia().toUpperCase();
-
-        if (!freq.equals("DIARIO") && !freq.equals("SEMANAL")) {
+        if (habito.getFrequencia() == null) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
-                    "Frequência deve ser DIARIO ou SEMANAL"
+                    "Frequência é obrigatória"
             );
         }
 
         // 🔥 Atualiza apenas os campos necessários
         habito.setNome(habitoAtualizado.getNome());
         habito.setDescricao(habitoAtualizado.getDescricao());
-        habito.setFrequencia(freq);
+        habito.setFrequencia(habitoAtualizado.getFrequencia());
 
         return habitoRepository.save(habito);
     }

@@ -2,6 +2,7 @@ package com.felipe.habito.model;
 
 
 import jakarta.persistence.*;
+import com.felipe.habito.enums.Frequencia;
 
 @Entity
 @Table(name = "habitos")
@@ -16,8 +17,9 @@ public class Habito {
     @Column(length = 255)
     private String descricao;
 
-    @Column(nullable = false, length = 100)
-    private String frequencia;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Frequencia frequencia;
 
     private Boolean ativo = true;
 
@@ -31,7 +33,7 @@ public class Habito {
     public Habito() {
     }
 
-    public Habito(Long id, String nome, String descricao, String frequencia, Boolean ativo) {
+    public Habito(Long id, String nome, String descricao, Frequencia frequencia, Boolean ativo) {
         this.id = id;
         this.nome = nome;
         this.descricao = descricao;
@@ -63,11 +65,11 @@ public class Habito {
         this.descricao = descricao;
     }
 
-    public String getFrequencia() {
+    public Frequencia getFrequencia() {
         return frequencia;
     }
 
-    public void setFrequencia(String frequencia) {
+    public void setFrequencia(Frequencia frequencia) {
         this.frequencia = frequencia;
     }
 
