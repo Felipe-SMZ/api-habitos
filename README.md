@@ -12,6 +12,7 @@ Este projeto foi criado com foco em aprendizado de **arquitetura backend**, boas
 - Spring Boot
 - Spring Web
 - Spring Data JPA
+- Spring Validation
 - MySQL
 - Maven
 
@@ -24,8 +25,9 @@ Este projeto foi criado com foco em aprendizado de **arquitetura backend**, boas
 - ✅ Buscar hábito por ID
 - ✅ Atualizar hábito
 - ✅ Deletar hábito
-- ✅ Validação de regras de negócio
+- ✅ Validação de entrada com `@Valid` e Bean Validation
 - ✅ Definição automática de valores padrão (`ativo = true`)
+- ✅ Conversão entre entidade e DTO via `HabitoMapper`
 
 ---
 
@@ -34,9 +36,7 @@ Este projeto foi criado com foco em aprendizado de **arquitetura backend**, boas
 O projeto segue o padrão de arquitetura em camadas:
 
 ```
-
 controller → service → repository → model
-
 ```
 
 ### 🔹 Por que essa arquitetura?
@@ -53,7 +53,6 @@ controller → service → repository → model
 ## 📦 Estrutura do projeto
 
 ```
-
 com.felipe.habito
 │
 ├── controller
@@ -61,9 +60,11 @@ com.felipe.habito
 ├── repository
 ├── model
 ├── dto
-├── enums
-
-````
+│   ├── request
+│   └── response
+├── mapper
+└── enums
+```
 
 ---
 
@@ -90,19 +91,46 @@ O `record` foi escolhido por:
 
 ---
 
-### 🔹 Uso de `enum` para frequência
+### 🔹 Validação de entrada com `@Valid`
 
-Substituição de `String` por `enum`:
+As validações de formato e obrigatoriedade ficam no DTO, mantendo o Service focado apenas em regras de negócio.
+
+```java
+@NotBlank(message = "Nome é obrigatório")
+@Size(max = 100, message = "Nome deve ter no máximo 100 caracteres")
+String nome,
+
+@NotNull(message = "Frequência é obrigatória")
+Frequencia frequencia
+```
+
+👉 Separa responsabilidades: validação de entrada no DTO, regras de negócio no Service.
+
+---
+
+### 🔹 Uso de `HabitoMapper`
+
+Classe responsável pela conversão entre `Habito` (entidade) e os DTOs de request/response.
+
+```
+HabitoRequestDTO → Habito    (toEntity)
+Habito → HabitoResponseDTO   (toDTO)
+```
+
+👉 Elimina repetição no Controller e centraliza a conversão em um único lugar.
+
+---
+
+### 🔹 Uso de `enum` para frequência
 
 ```java
 DIARIO, SEMANAL
-````
+```
 
 👉 Benefícios:
-
-* Evita valores inválidos
-* Remove validações manuais
-* Torna o código mais seguro
+- Evita valores inválidos
+- Remove validações manuais
+- Torna o código mais seguro
 
 ---
 
@@ -120,13 +148,7 @@ Define automaticamente `ativo = true` antes de salvar.
 
 ### 🔹 Tratamento de erros
 
-Uso de:
-
-```java
-ResponseStatusException
-```
-
-👉 Permite retornar respostas HTTP adequadas (400, 404, etc).
+Uso de `ResponseStatusException` para retornar respostas HTTP adequadas (400, 404, etc).
 
 ---
 
@@ -138,8 +160,6 @@ ResponseStatusException
 CREATE DATABASE habito;
 ```
 
----
-
 ### 2. Configurar a aplicação
 
 No arquivo `application.properties`:
@@ -148,8 +168,6 @@ No arquivo `application.properties`:
 spring.datasource.url=jdbc:mysql://localhost:3306/habito?serverTimezone=UTC
 spring.profiles.active=local
 ```
-
----
 
 ### 3. Configurar credenciais (não versionado)
 
@@ -178,25 +196,25 @@ spring.datasource.password=SUA_SENHA
 }
 ```
 
----
-
 ### 📍 Listar hábitos
 
 **GET** `/habitos`
-
----
 
 ### 📍 Buscar por ID
 
 **GET** `/habitos/{id}`
 
----
-
 ### 📍 Atualizar hábito
 
 **PUT** `/habitos/{id}`
 
----
+```json
+{
+  "nome": "Estudar Java",
+  "descricao": "Estudar 2 horas por dia",
+  "frequencia": "SEMANAL"
+}
+```
 
 ### 📍 Deletar hábito
 
@@ -208,17 +226,16 @@ spring.datasource.password=SUA_SENHA
 
 A API pode ser testada utilizando:
 
-* Insomnia
-* Postman
+- Insomnia
+- Postman
 
 ---
 
 ## 📈 Melhorias futuras
 
-* [ ] Validação com `@Valid`
-* [ ] Tratamento global de exceções (`@ControllerAdvice`)
-* [ ] Mapeamento automático (MapStruct)
-* [ ] Autenticação e autorização
+- [ ] Tratamento global de exceções (`@ControllerAdvice`)
+- [ ] Mapeamento automático (MapStruct)
+- [ ] Autenticação e autorização
 
 ---
 
@@ -226,13 +243,11 @@ A API pode ser testada utilizando:
 
 Desenvolvido por **Felipe Shimizu**
 
-* 🌐 Portfólio: [https://www.devfelipeshimizu.me/](https://www.devfelipeshimizu.me/)
-* 💼 LinkedIn: [https://www.linkedin.com/in/felipesshimizu/](https://www.linkedin.com/in/felipesshimizu/)
+- 🌐 Portfólio: [https://www.devfelipeshimizu.me/](https://www.devfelipeshimizu.me/)
+- 💼 LinkedIn: [https://www.linkedin.com/in/felipesshimizu/](https://www.linkedin.com/in/felipesshimizu/)
 
 ---
 
 ## 📄 Licença
 
 Este projeto é de uso educacional.
-
-
