@@ -29,7 +29,27 @@ public class HabitoController {
     //GET
     @GetMapping
     public ResponseEntity<List<Habito>> listarHabitos() {
-        List<Habito> habitos =  habitoService.buscarTodos();
+        List<Habito> habitos = habitoService.buscarTodos();
         return ResponseEntity.ok(habitos);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Habito> buscarPorId(@PathVariable Long id) {
+        Habito habito = habitoService.buscarPorId(id);
+        return ResponseEntity.ok(habito);
+    }
+
+    //PUT
+    @PutMapping("/{id}")
+    public ResponseEntity<Habito> atualizar(@PathVariable Long id, @RequestBody Habito habito) {
+        Habito habitoSalvo = habitoService.atualizar(id, habito);
+        return ResponseEntity.ok(habitoSalvo);
+    }
+
+    //DELETE
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Habito> deletarPorId(@PathVariable Long id) {
+        habitoService.deletar(id);
+        return ResponseEntity.noContent().build();
     }
 }

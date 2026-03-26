@@ -17,6 +17,14 @@ public class HabitoService {
         this.habitoRepository = habitoRepository;
     }
 
+    private Habito buscarOuFalhar(Long id) {
+        return habitoRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Habito " + id + " não encontrado"
+                ));
+    }
+
     public Habito salvar(Habito habito) {
         //validacao
         if (habito.getNome() == null || habito.getNome().isBlank()) {
@@ -46,5 +54,49 @@ public class HabitoService {
 
     public List<Habito> buscarTodos() {
         return habitoRepository.findAll();
+    }
+
+    public Habito buscarPorId(Long id) {
+        return buscarOuFalhar(id);
+    }
+
+    public Habito atualizar(Long id, Habito habitoAtualizado) {
+
+        Habito habito = buscarOuFalhar(id);
+
+        if (habitoAtualizado.getNome() == null || habitoAtualizado.getNome().isBlank()) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Nome é obrigatório"
+            );
+        }
+
+        if (habitoAtualizado.getFrequencia() == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Frequência é obrigatória"
+            );
+        }
+
+        String freq = habitoAtualizado.getFrequencia().toUpperCase();
+
+        if (!freq.equals("DIARIO") && !freq.equals("SEMANAL")) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Frequência deve ser DIARIO ou SEMANAL"
+            );
+        }
+
+        // 🔥 Atualiza apenas os campos necessários
+        habito.setNome(habitoAtualizado.getNome());
+        habito.setDescricao(habitoAtualizado.getDescricao());
+        habito.setFrequencia(freq);
+
+        return habitoRepository.save(habito);
+    }
+
+    public void deletar(Long id) {
+        Habito habito = buscarOuFalhar(id);
+        habitoRepository.deleteById(id);
     }
 }
