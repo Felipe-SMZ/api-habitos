@@ -1,5 +1,7 @@
 package com.felipe.habito.controller;
 
+import com.felipe.habito.dto.request.HabitoRequestDTO;
+import com.felipe.habito.dto.response.HabitoResponseDTO;
 import com.felipe.habito.model.Habito;
 import com.felipe.habito.service.HabitoService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,29 +23,83 @@ public class HabitoController {
 
     //POST
     @PostMapping
-    public ResponseEntity<Habito> criarHabito(@RequestBody Habito habito) {
-        Habito habitoSalvo = habitoService.salvar(habito);
-        return ResponseEntity.status(HttpStatus.CREATED).body(habitoSalvo);
+    public ResponseEntity<HabitoResponseDTO> criarHabito(@RequestBody HabitoRequestDTO dto) {
+
+        Habito habito = new Habito();
+        habito.setNome(dto.nome());
+        habito.setDescricao(dto.descricao());
+        habito.setFrequencia(dto.frequencia());
+
+        Habito salvo = habitoService.salvar(habito);
+
+        HabitoResponseDTO response = new HabitoResponseDTO(
+                salvo.getId(),
+                salvo.getNome(),
+                salvo.getDescricao(),
+                salvo.getFrequencia(),
+                salvo.getAtivo()
+        );
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     //GET
     @GetMapping
-    public ResponseEntity<List<Habito>> listarHabitos() {
-        List<Habito> habitos = habitoService.buscarTodos();
-        return ResponseEntity.ok(habitos);
+    public ResponseEntity<List<HabitoResponseDTO>> listarHabitos() {
+
+        List<HabitoResponseDTO> lista = habitoService.buscarTodos()
+                .stream()
+                .map(h -> new HabitoResponseDTO(
+                        h.getId(),
+                        h.getNome(),
+                        h.getDescricao(),
+                        h.getFrequencia(),
+                        h.getAtivo()
+                ))
+                .toList();
+
+        return ResponseEntity.ok(lista);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Habito> buscarPorId(@PathVariable Long id) {
-        Habito habito = habitoService.buscarPorId(id);
-        return ResponseEntity.ok(habito);
+    public ResponseEntity<HabitoResponseDTO> buscarPorId(@PathVariable Long id) {
+
+        Habito h = habitoService.buscarPorId(id);
+
+        HabitoResponseDTO response = new HabitoResponseDTO(
+                h.getId(),
+                h.getNome(),
+                h.getDescricao(),
+                h.getFrequencia(),
+                h.getAtivo()
+        );
+
+        return ResponseEntity.ok(response);
     }
 
     //PUT
     @PutMapping("/{id}")
-    public ResponseEntity<Habito> atualizar(@PathVariable Long id, @RequestBody Habito habito) {
-        Habito habitoSalvo = habitoService.atualizar(id, habito);
-        return ResponseEntity.ok(habitoSalvo);
+    public ResponseEntity<HabitoResponseDTO> atualizar(
+            @PathVariable Long id,
+            @RequestBody HabitoRequestDTO dto
+    ) {
+
+        Habito habito = new Habito();
+        habito.setNome(dto.nome());
+        habito.setDescricao(dto.descricao());
+        habito.setFrequencia(dto.frequencia());
+
+        Habito atualizado = habitoService.atualizar(id, habito);
+
+        HabitoResponseDTO response = new HabitoResponseDTO(
+                atualizado.getId(),
+                atualizado.getNome(),
+                atualizado.getDescricao(),
+                atualizado.getFrequencia(),
+                atualizado.getAtivo()
+        );
+
+        return ResponseEntity.ok(response);
     }
 
     //DELETE
