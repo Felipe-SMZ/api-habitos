@@ -2,8 +2,10 @@ package com.felipe.habito.controller;
 
 import com.felipe.habito.dto.request.HabitoRequestDTO;
 import com.felipe.habito.dto.response.HabitoResponseDTO;
+import com.felipe.habito.mapper.HabitoMapper;
 import com.felipe.habito.model.Habito;
 import com.felipe.habito.service.HabitoService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,31 +18,22 @@ import java.util.List;
 public class HabitoController {
 
     private final HabitoService habitoService;
+    private final HabitoMapper habitoMapper;
 
-    public HabitoController(HabitoService habitoService) {
+    public HabitoController(HabitoService habitoService, HabitoMapper habitoMapper) {
         this.habitoService = habitoService;
+        this.habitoMapper = habitoMapper;
     }
 
     //POST
     @PostMapping
-    public ResponseEntity<HabitoResponseDTO> criarHabito(@RequestBody HabitoRequestDTO dto) {
+    public ResponseEntity<HabitoResponseDTO> criarHabito(@RequestBody @Valid HabitoRequestDTO dto) {
 
-        Habito habito = new Habito();
-        habito.setNome(dto.nome());
-        habito.setDescricao(dto.descricao());
-        habito.setFrequencia(dto.frequencia());
+        Habito habitoEntity = habitoMapper.toEntity(dto);
+        Habito salvo = habitoService.salvar(habitoEntity);
+        HabitoResponseDTO habitoDTO = habitoMapper.toDTO(salvo);
 
-        Habito salvo = habitoService.salvar(habito);
-
-        HabitoResponseDTO response = new HabitoResponseDTO(
-                salvo.getId(),
-                salvo.getNome(),
-                salvo.getDescricao(),
-                salvo.getFrequencia(),
-                salvo.getAtivo()
-        );
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(habitoDTO);
     }
 
     //GET
@@ -49,13 +42,7 @@ public class HabitoController {
 
         List<HabitoResponseDTO> lista = habitoService.buscarTodos()
                 .stream()
-                .map(h -> new HabitoResponseDTO(
-                        h.getId(),
-                        h.getNome(),
-                        h.getDescricao(),
-                        h.getFrequencia(),
-                        h.getAtivo()
-                ))
+                .map(habitoMapper::toDTO)
                 .toList();
 
         return ResponseEntity.ok(lista);
@@ -66,13 +53,7 @@ public class HabitoController {
 
         Habito h = habitoService.buscarPorId(id);
 
-        HabitoResponseDTO response = new HabitoResponseDTO(
-                h.getId(),
-                h.getNome(),
-                h.getDescricao(),
-                h.getFrequencia(),
-                h.getAtivo()
-        );
+        HabitoResponseDTO response = habitoMapper.toDTO(h);
 
         return ResponseEntity.ok(response);
     }
@@ -81,30 +62,21 @@ public class HabitoController {
     @PutMapping("/{id}")
     public ResponseEntity<HabitoResponseDTO> atualizar(
             @PathVariable Long id,
-            @RequestBody HabitoRequestDTO dto
+            @RequestBody @Valid HabitoRequestDTO dto
     ) {
 
-        Habito habito = new Habito();
-        habito.setNome(dto.nome());
-        habito.setDescricao(dto.descricao());
-        habito.setFrequencia(dto.frequencia());
+        Habito habito = habitoMapper.toEntity(dto);
 
         Habito atualizado = habitoService.atualizar(id, habito);
 
-        HabitoResponseDTO response = new HabitoResponseDTO(
-                atualizado.getId(),
-                atualizado.getNome(),
-                atualizado.getDescricao(),
-                atualizado.getFrequencia(),
-                atualizado.getAtivo()
-        );
+        HabitoResponseDTO response = habitoMapper.toDTO(atualizado);
 
         return ResponseEntity.ok(response);
     }
 
     //DELETE
     @DeleteMapping("/{id}")
-    public ResponseEntity<Habito> deletarPorId(@PathVariable Long id) {
+    public ResponseEntity<Void> deletarPorId(@PathVariable Long id) {
         habitoService.deletar(id);
         return ResponseEntity.noContent().build();
     }
