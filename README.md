@@ -28,6 +28,7 @@ Este projeto foi criado com foco em aprendizado de **arquitetura backend**, boas
 - ✅ Validação de entrada com `@Valid` e Bean Validation
 - ✅ Definição automática de valores padrão (`ativo = true`)
 - ✅ Conversão entre entidade e DTO via `HabitoMapper`
+- ✅ Tratamento global de exceções com `@RestControllerAdvice`
 
 ---
 
@@ -63,6 +64,7 @@ com.felipe.habito
 │   ├── request
 │   └── response
 ├── mapper
+├── exception
 └── enums
 ```
 
@@ -121,6 +123,33 @@ Habito → HabitoResponseDTO   (toDTO)
 
 ---
 
+### 🔹 Tratamento global de exceções
+
+Uso de `@RestControllerAdvice` para interceptar exceções de toda a aplicação em um único lugar, retornando respostas padronizadas e legíveis.
+
+**Exceções tratadas:**
+
+| Exceção | Status | Descrição |
+|---|---|---|
+| `MethodArgumentNotValidException` | 400 | Falha na validação do DTO (`@Valid`) |
+| `ResponseStatusException` | dinâmico | Erros de negócio (ex: recurso não encontrado) |
+
+**Formato padrão de erro:**
+
+```json
+{
+  "timestamp": "2026-03-26T23:18:53.066Z",
+  "status": 404,
+  "error": "Not Found",
+  "message": ["Habito 999 não encontrado"],
+  "path": "/habitos/999"
+}
+```
+
+👉 Garante respostas consistentes e elimina a necessidade de tratar erros em cada Controller individualmente.
+
+---
+
 ### 🔹 Uso de `enum` para frequência
 
 ```java
@@ -143,12 +172,6 @@ DIARIO, SEMANAL
 Define automaticamente `ativo = true` antes de salvar.
 
 👉 Evita inconsistência de dados sem depender do client.
-
----
-
-### 🔹 Tratamento de erros
-
-Uso de `ResponseStatusException` para retornar respostas HTTP adequadas (400, 404, etc).
 
 ---
 
@@ -233,9 +256,11 @@ A API pode ser testada utilizando:
 
 ## 📈 Melhorias futuras
 
-- [ ] Tratamento global de exceções (`@ControllerAdvice`)
+- [ ] Entidade `Usuario` com relacionamento `1:N` com `Habito`
+- [ ] Autenticação com Spring Security
+- [ ] Autorização via JWT
+- [ ] Roles e controle de acesso por perfil
 - [ ] Mapeamento automático (MapStruct)
-- [ ] Autenticação e autorização
 
 ---
 
