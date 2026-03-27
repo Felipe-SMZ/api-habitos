@@ -1,7 +1,8 @@
 package com.felipe.habito.model;
 
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
+
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,23 +25,23 @@ public class Usuario {
 
 
     @Column(updatable = false)
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 
     @Column
-    private LocalDateTime updatedAt;
+    private Instant updatedAt;
 
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL)
-    private List<Habito> habitos =  new ArrayList<>();
+    private List<Habito> habitos = new ArrayList<>();
 
     @PrePersist
     protected void antesDeSalvar() {
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
+        this.createdAt = Instant.now();
+        this.updatedAt = Instant.now();
     }
 
     @PreUpdate
     protected void antesDeAtualizar() {
-        this.updatedAt = LocalDateTime.now();
+        this.updatedAt = Instant.now();
     }
 
     public Usuario() {
@@ -77,19 +78,19 @@ public class Usuario {
         this.senha = senha;
     }
 
-    public LocalDateTime getCreatedAt() {
+    public Instant getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
+    public void setCreatedAt(Instant createdAt) {
         this.createdAt = createdAt;
     }
 
-    public LocalDateTime getUpdatedAt() {
+    public Instant getUpdatedAt() {
         return updatedAt;
     }
 
-    public void setUpdatedAt(LocalDateTime updatedAt) {
+    public void setUpdatedAt(Instant updatedAt) {
         this.updatedAt = updatedAt;
     }
 
