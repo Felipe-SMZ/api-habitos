@@ -27,8 +27,10 @@ Este projeto foi criado com foco em aprendizado de **arquitetura backend**, boas
 - ✅ Deletar hábito
 - ✅ Validação de entrada com `@Valid` e Bean Validation
 - ✅ Definição automática de valores padrão (`ativo = true`)
-- ✅ Conversão entre entidade e DTO via `HabitoMapper`
+- ✅ Conversão entre entidade e DTO via Mappers
 - ✅ Tratamento global de exceções com `@RestControllerAdvice`
+- ✅ Cadastro e gerenciamento de usuários
+- ✅ Relacionamento `1:N` entre `Usuario` e `Habito`
 
 ---
 
@@ -79,7 +81,7 @@ Os DTOs foram utilizados para separar:
 - Dados de entrada (**Request**)
 - Dados de saída (**Response**)
 
-👉 Isso evita expor diretamente a entidade e aumenta a segurança da API.
+👉 Isso evita expor diretamente a entidade e aumenta a segurança da API. A senha do usuário, por exemplo, nunca é exposta no response.
 
 ---
 
@@ -110,13 +112,13 @@ Frequencia frequencia
 
 ---
 
-### 🔹 Uso de `HabitoMapper`
+### 🔹 Uso de Mappers
 
-Classe responsável pela conversão entre `Habito` (entidade) e os DTOs de request/response.
+Classes responsáveis pela conversão entre entidade e DTOs de request/response.
 
 ```
-HabitoRequestDTO → Habito    (toEntity)
-Habito → HabitoResponseDTO   (toDTO)
+RequestDTO  → Entity   (toEntity)
+Entity      → ResponseDTO  (toDTO)
 ```
 
 👉 Elimina repetição no Controller e centraliza a conversão em um único lugar.
@@ -138,15 +140,27 @@ Uso de `@RestControllerAdvice` para interceptar exceções de toda a aplicação
 
 ```json
 {
-  "timestamp": "2026-03-26T23:18:53.066Z",
-  "status": 404,
-  "error": "Not Found",
-  "message": ["Habito 999 não encontrado"],
-  "path": "/habitos/999"
+  "timestamp": "2026-03-27T20:20:20.851Z",
+  "status": 409,
+  "error": "Conflict",
+  "message": ["E-mail já cadastrado"],
+  "path": "/usuarios/1"
 }
 ```
 
 👉 Garante respostas consistentes e elimina a necessidade de tratar erros em cada Controller individualmente.
+
+---
+
+### 🔹 Relacionamento `1:N` entre Usuario e Habito
+
+Um usuário pode ter muitos hábitos. O relacionamento é mapeado com `@OneToMany` em `Usuario` e `@ManyToOne` em `Habito`, com `FetchType.LAZY` para evitar consultas desnecessárias ao banco.
+
+---
+
+### 🔹 Validação de email único
+
+O `UsuarioService` valida se o email já está cadastrado antes de salvar ou atualizar, diferenciando se o email pertence ao próprio usuário ou a outro — evitando falsos conflitos no `PUT`.
 
 ---
 
@@ -156,20 +170,14 @@ Uso de `@RestControllerAdvice` para interceptar exceções de toda a aplicação
 DIARIO, SEMANAL
 ```
 
-👉 Benefícios:
-- Evita valores inválidos
-- Remove validações manuais
-- Torna o código mais seguro
+👉 Evita valores inválidos e remove validações manuais.
 
 ---
 
-### 🔹 Uso de `@PrePersist`
+### 🔹 Uso de `@PrePersist` e `@PreUpdate`
 
-```java
-@PrePersist
-```
-
-Define automaticamente `ativo = true` antes de salvar.
+- `@PrePersist` → define `ativo = true` em `Habito` e `createdAt` em `Usuario` automaticamente
+- `@PreUpdate` → atualiza `updatedAt` em `Usuario` a cada modificação
 
 👉 Evita inconsistência de dados sem depender do client.
 
@@ -207,8 +215,38 @@ spring.datasource.password=SUA_SENHA
 
 ## 🔌 Endpoints
 
-### 📍 Criar hábito
+### 👤 Usuários
 
+#### 📍 Criar usuário
+**POST** `/usuarios`
+
+```json
+{
+  "nome": "Felipe Shimizu",
+  "email": "felipe@email.com",
+  "senha": "senha123"
+}
+```
+
+#### 📍 Atualizar usuário
+**PUT** `/usuarios/{id}`
+
+```json
+{
+  "nome": "Felipe Shimizu Novo",
+  "email": "felipe@email.com",
+  "senha": "senha123"
+}
+```
+
+#### 📍 Deletar usuário
+**DELETE** `/usuarios/{id}`
+
+---
+
+### 📋 Hábitos
+
+#### 📍 Criar hábito
 **POST** `/habitos`
 
 ```json
@@ -219,16 +257,13 @@ spring.datasource.password=SUA_SENHA
 }
 ```
 
-### 📍 Listar hábitos
-
+#### 📍 Listar hábitos
 **GET** `/habitos`
 
-### 📍 Buscar por ID
-
+#### 📍 Buscar por ID
 **GET** `/habitos/{id}`
 
-### 📍 Atualizar hábito
-
+#### 📍 Atualizar hábito
 **PUT** `/habitos/{id}`
 
 ```json
@@ -239,8 +274,7 @@ spring.datasource.password=SUA_SENHA
 }
 ```
 
-### 📍 Deletar hábito
-
+#### 📍 Deletar hábito
 **DELETE** `/habitos/{id}`
 
 ---
@@ -256,7 +290,6 @@ A API pode ser testada utilizando:
 
 ## 📈 Melhorias futuras
 
-- [ ] Entidade `Usuario` com relacionamento `1:N` com `Habito`
 - [ ] Autenticação com Spring Security
 - [ ] Autorização via JWT
 - [ ] Roles e controle de acesso por perfil
