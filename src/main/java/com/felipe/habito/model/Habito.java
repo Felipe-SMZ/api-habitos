@@ -23,6 +23,10 @@ public class Habito {
 
     private Boolean ativo = true;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "usuario_id", nullable = false)
+    private Usuario usuario;
+
     @PrePersist
     public void prePersist() {
         if (ativo == null) {
